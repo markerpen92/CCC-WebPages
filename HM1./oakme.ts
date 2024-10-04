@@ -9,11 +9,11 @@ app.use((ctx) => {
   if (pathname == '/') {
     ctx.response.body = `<html>
 <body>
-<h1>我的自我介紹</h1>
+<h1>Self Introduction</h1>
 <ol>
-<li><a href="/name">姓名</a></li>
-<li><a href="/age">年齡</a></li>
-<li><a href="/gender">性別</a></li>
+<li><a href="/name">NAME</a></li>
+<li><a href="/age">AGE</a></li>
+<li><a href="/gender">GENDER</a></li>
 </ol>
 </body>
 </html>
