@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Contact Form</title>
+    </head>
+    <body>
+        <h2>Contact Form</h2>
+        <form
+            action="{{ url_for('contact_complete') }}"
+            method="post"
+            novalidate="novalidate"
+        >
+            <table>
+                <tr>
+                    <td>Username</td>
+                    <td>
+                        <input
+                            type="text"
+                            name="username"
+                            value="{{ username }}"
+                            placeholder="Username"
+                        />
+                    </td>
+                </tr>
+                <tr>
+                    <td>Mail Address</td>
+                    <td>
+                        <input
+                            type="text"
+                            name="email"
+                            value="{{ email }}"
+                            placeholder="Email Address"
+                        />
+                    </td>
+                </tr>
+            </table>
+            <input type="submit" value="Send" />
+        </form>
+        <br>
+        <button onclick="window.location.href='/users'">Users List</button>
+    </body>
+</html>
