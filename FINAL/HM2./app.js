@@ -2,8 +2,8 @@ import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import * as render from './render.js';
 
 const posts = [
-  { id : 0 , title : 'aaa' , body : 'aaaaa' , post_time : new Date(Date.now()).toLocaleString()},
-  { id : 1 , title : 'bbb' , body : 'bbbbb' , post_time : new Date(Date.now()).toLocaleString()}
+  { id : 0 , title : 'aaa' , body : 'aaaaa' , post_time : new Date().toLocaleString()},
+  { id : 1 , title : 'bbb' , body : 'bbbbb' , post_time : new Date().toLocaleString()}
 ];
 
 const router = new Router();
@@ -50,6 +50,13 @@ async function create(ctx) {
   }
 }
 
-console.log('Server run at http://127.0.0.1:8000');
-await app.listen({ port: 8000 });
+export async function run() {
+  const port = 8002;
+  console.log(`Server running at http://127.0.0.1:${port}`);
+  await app.listen({ port });
+  return {
+    message: `Server started on port ${port}`,
+    posts: posts,
+  };
+}
 
