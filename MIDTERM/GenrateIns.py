@@ -1,7 +1,6 @@
 import os
 import yaml
 
-
 def GeneratePortingTable(projects): 
     PortingTable = {}
     allowingports = [8000, 8001, 8002, 8003, 8004]
@@ -16,9 +15,8 @@ def GeneratePortingTable(projects):
 
 
 
-def GenerateDockerfiles(upload_folder , docker_compose_content , docker_template): 
+def GenerateDockerfiles(upload_folder , docker_compose_content , docker_imgs , docker_template): 
     projects = [f.name for f in os.scandir(upload_folder) if f.is_dir()]
-
     hostnames = [f"{project}.localhost" for project in projects]
     PortingTable = GeneratePortingTable(projects)
 
@@ -26,13 +24,15 @@ def GenerateDockerfiles(upload_folder , docker_compose_content , docker_template
         service_name = f"service_{idx+1}"
         hostname = hostnames[idx]
         host_port = PortingTable[folder]
+        img_idx = -1 if idx >= len(docker_imgs) else idx
 
         with open(docker_template , "r") as template_file:
             template_content = template_file.read()
 
         for file_name in reversed(os.listdir(f"{upload_folder}/{folder}")) : 
-            if file_name.endswith(".js") or file_name.endswith(".ts"):
-                dockerfile_content = template_content.replace("{MAIN_FILE}", file_name)
+            if file_name.endswith(".js") or file_name.endswith(".ts") : 
+                print(img_idx)
+                dockerfile_content = template_content.replace("{MAIN_FILE}", file_name).replace("{Docker_Image}" , docker_imgs[img_idx])
                 break
 
         with open(os.path.join(f"{upload_folder}/{folder}", "Dockerfile"), "w") as dockerfile:
@@ -60,7 +60,6 @@ def BuildTraefikService(docker_compose_content=None) :
             "db_data": {}
         }
     }
-
     traefik_service = {
         "image": "traefik:v2.5",
         "command": [
@@ -79,15 +78,18 @@ def BuildTraefikService(docker_compose_content=None) :
     }
 
     docker_compose_content["services"]["traefik"] = traefik_service
-
     return docker_compose_content
 
 
 
 def GenerateDockers(upload_folder="upload-projects" , docker_imgs=["denoland/deno:alpine-1.46.3"] , docker_template="Dockerfile-template" , enable_traefik=True) : 
+    for img in docker_imgs : 
+        if not bool(os.popen(f"docker images -q {img}").read().strip()) : 
+            print(f"Image {img} not found. Pulling it...")
+            os.system(f"docker pull {img}") == 0 or print(f"Failed to pull image: {img}")
 
     DockerComposeContent = BuildTraefikService() if enable_traefik else None
-    DockerComposeContent = GenerateDockerfiles(upload_folder , DockerComposeContent , docker_template)
+    DockerComposeContent = GenerateDockerfiles(upload_folder , DockerComposeContent , docker_imgs , docker_template)
 
     with open("docker-compose.yml", "w") as DockerComposeFile :
         yaml.dump(DockerComposeContent , DockerComposeFile , default_flow_style=False)
